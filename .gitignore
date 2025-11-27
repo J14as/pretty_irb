@@ -1,0 +1,13 @@
+*.gem
+*.rbc
+.bundle
+.ruby-version
+.ruby-gemset
+Gemfile.lock
+vendor/
+.DS_Store
+.idea/
+*.swp
+*.swo
+*~
+.vscode/

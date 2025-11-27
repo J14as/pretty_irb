@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "pretty_irb"
+
+if __FILE__ == $0
+  PrettyIRB.start
+end
