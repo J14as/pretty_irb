@@ -1,16 +1,12 @@
 Gem::Specification.new do |spec|
   spec.name          = "pretty_irb"
-  spec.version       = "0.1.0"
+  spec.version       = "0.1.2"
   spec.authors       = ["Jayesh"]
   spec.email         = ["jayesh@example.com"]
   spec.summary       = "A pretty IRB replacement with auto-correct and beautiful fonts"
   spec.description   = "An enhanced interactive Ruby shell with pretty formatting, syntax highlighting, and auto-correct functionality"
   spec.homepage      = "https://github.com/j14as/pretty_irb"
   spec.license       = "MIT"
-  spec.source_code_uri = "https://github.com/j14as/pretty_irb"
-  spec.bug_tracker_uri = "https://github.com/j14as/pretty_irb/issues"
-  spec.documentation_uri = "https://github.com/j14as/pretty_irb#readme"
-  spec.changelog_uri = "https://github.com/j14as/pretty_irb/blob/main/CHANGELOG.md"
 
   # Prefer files from git, but fall back to a conservative glob when git isn't available
   git_files = nil

@@ -94,7 +94,9 @@ module PrettyIRB
       type = value.class.name
       size = estimate_size(value)
       
-      "  #{name}: #{type} (#{size} bytes)\n    = #{value.inspect.truncate(60)}\n\n"
+      value_str = value.inspect
+      value_str = value_str.length > 60 ? value_str[0..56] + '...' : value_str
+      "  #{name}: #{type} (#{size} bytes)\n    = #{value_str}\n\n"
     end
 
     def detailed_info(name, value)
