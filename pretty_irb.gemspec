@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "pretty_irb"
-  spec.version       = "0.1.2"
+  spec.version       = "0.1.3"
   spec.authors       = ["Jayesh"]
   spec.email         = ["jayesh@example.com"]
   spec.summary       = "A pretty IRB replacement with auto-correct and beautiful fonts"
