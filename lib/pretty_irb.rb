@@ -13,6 +13,7 @@ require_relative "pretty_irb/snippet_manager"
 require_relative "pretty_irb/variable_inspector"
 require_relative "pretty_irb/benchmarker"
 require_relative "pretty_irb/cheat_sheet"
+require_relative "pretty_irb/irb_commands"
 require_relative "pretty_irb/shell"
 
 module PrettyIRB

@@ -50,8 +50,15 @@ module PrettyIRB
 
     # Export history to file
     def export(filename)
-      File.write(filename, format_for_export)
-      "✓ History exported to #{filename}"
+      path = File.expand_path(filename.to_s)
+      # Refuse paths that point at system-sensitive locations
+      if path.start_with?("/etc", "/sys", "/proc", "/dev")
+        return "❌ Refusing to write to system path: #{path}"
+      end
+      File.write(path, format_for_export)
+      "✓ History exported to #{path}"
+    rescue => e
+      "❌ Export failed: #{e.message}"
     end
 
     private

@@ -37,6 +37,7 @@ Gem::Specification.new do |spec|
   # Allow any version >= 1.5 but < 3.0 to avoid conflicts with older constraints.
   spec.add_dependency "did_you_mean", ">= 1.5", "< 3.0"     # Auto-correct suggestions
   spec.add_dependency "reline", "~> 0.3"           # Enhanced readline
+  spec.add_dependency "benchmark"                   # Performance measurement
 
   # Development dependencies
   spec.add_development_dependency "bundler", "~> 2.0"

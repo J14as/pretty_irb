@@ -11,6 +11,7 @@ module PrettyIRB
 
     # Save a code snippet
     def save(name, code, description = "")
+      return "❌ Invalid snippet name. Use only letters, numbers, underscores, and hyphens." unless valid_name?(name)
       filename = snippet_path(name)
       
       snippet = {
@@ -27,6 +28,7 @@ module PrettyIRB
 
     # Load a snippet
     def load(name)
+      return "❌ Invalid snippet name." unless valid_name?(name)
       filename = snippet_path(name)
       return "❌ Snippet '#{name}' not found" unless File.exist?(filename)
 
@@ -73,6 +75,7 @@ module PrettyIRB
 
     # Delete a snippet
     def delete(name)
+      return "❌ Invalid snippet name." unless valid_name?(name)
       filename = snippet_path(name)
       return "❌ Snippet '#{name}' not found" unless File.exist?(filename)
 
@@ -82,6 +85,7 @@ module PrettyIRB
 
     # Show snippet details
     def show(name)
+      return "❌ Invalid snippet name." unless valid_name?(name)
       filename = snippet_path(name)
       return "❌ Snippet '#{name}' not found" unless File.exist?(filename)
 
@@ -98,6 +102,10 @@ module PrettyIRB
 
     def ensure_snippet_dir
       FileUtils.mkdir_p(SNIPPET_DIR) unless Dir.exist?(SNIPPET_DIR)
+    end
+
+    def valid_name?(name)
+      name.to_s.match?(/\A[a-zA-Z0-9_-]+\z/)
     end
 
     def snippet_path(name)
