@@ -286,13 +286,13 @@ module PrettyIRB
 
       def example_loops
         <<~EXAMPLES
-          📚 Loop Examples:
+          📚 Loops and Iteration Examples:
           
           Using each:
             [1, 2, 3].each { |x| puts x }
             
           Using times:
-            5.times { |i| puts "Number #{i}" }
+            5.times { |i| puts "Number \#{i}" }
             
           Using while:
             i = 0
@@ -707,7 +707,7 @@ module PrettyIRB
 
       def general_best_practices
         <<~PRACTICES
-          ✅ General Best Practices:
+          ✅ General Ruby Best Practices:
           
           Code Quality:
             • DRY: Don't Repeat Yourself

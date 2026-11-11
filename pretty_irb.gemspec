@@ -1,6 +1,8 @@
+require_relative "lib/pretty_irb/version"
+
 Gem::Specification.new do |spec|
   spec.name          = "pretty_irb"
-  spec.version       = "0.1.3"
+  spec.version       = PrettyIRB::VERSION
   spec.authors       = ["Jayesh"]
   spec.email         = ["jayesh@example.com"]
   spec.summary       = "A pretty IRB replacement with auto-correct and beautiful fonts"

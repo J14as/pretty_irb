@@ -19,6 +19,13 @@ module PrettyIRB
       }
     end
 
+    # Attach an error message to the most recent history entry
+    def record_error(error_message)
+      return if @entries.empty?
+
+      @entries.last[:error] = error_message
+    end
+
     # Search history by keyword
     def search(keyword)
       results = @entries.select { |entry| entry[:code].include?(keyword) }
@@ -51,8 +58,13 @@ module PrettyIRB
     # Export history to file
     def export(filename)
       path = File.expand_path(filename.to_s)
-      # Refuse paths that point at system-sensitive locations
-      if path.start_with?("/etc", "/sys", "/proc", "/dev")
+      # Refuse paths that point at system-sensitive locations (Unix and Windows)
+      normalized = path.tr('\\', '/')
+      unix_sensitive    = %w[/etc /sys /proc /dev]
+      windows_sensitive = %w[C:/Windows C:/Program]
+      blocked = unix_sensitive.any? { |p| normalized.start_with?(p) } ||
+                windows_sensitive.any? { |p| normalized.start_with?(p) }
+      if blocked
         return "❌ Refusing to write to system path: #{path}"
       end
       File.write(path, format_for_export)

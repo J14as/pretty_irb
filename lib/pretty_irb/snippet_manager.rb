@@ -58,6 +58,7 @@ module PrettyIRB
         data = JSON.parse(File.read(file))
         data["name"].include?(keyword) || 
         data["code"].include?(keyword) ||
+        data["description"].to_s.include?(keyword) ||
         data["tags"].any? { |tag| tag.include?(keyword) }
       end
 

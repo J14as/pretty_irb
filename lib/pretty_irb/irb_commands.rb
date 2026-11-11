@@ -9,12 +9,17 @@ module PrettyIRB
     # Show all pretty_irb extras (use IRB's own `help` for core IRB commands)
 
     def commands
-      section = ->(t) { puts "\n  #{t}".cyan }
-      row     = ->(n, d) { puts "    #{"%-40s" % n}#{d.light_black}" }
+      ui = PrettyIRB::UI
+      section = ->(title) { puts "\n  #{ui.paint(title, :white, :bold)}" }
+      row     = ->(name, desc) { puts ui.table_row(ui.paint(name, :cyan), ui.paint(desc, :light_black), left_width: 40, indent: 4) }
 
-      puts "\n  pretty_irb  v#{PrettyIRB::VERSION}".cyan + \
-           "  ·  type  help  for core IRB commands".light_black
-      puts "  " + ("─" * 60).light_black
+      title = "#{ui.paint('pretty_irb', :white, :bold)} #{ui.paint("v#{PrettyIRB::VERSION}", :cyan)}"
+      puts
+      puts ui.box(
+        ["#{ui.paint('Command Reference', :white)} #{ui.paint('· type help for built-in IRB commands', :light_black)}"],
+        title: title,
+        min_width: 64
+      )
 
       section.("Snippets")
       row.("snippet",                      "list all saved snippets")
@@ -32,23 +37,23 @@ module PrettyIRB
       row.("vars(memory: true)",    "estimate memory usage")
 
       section.("Benchmark")
-      row.("bench('code')",                   "time code  (1 000 iterations)")
+      row.("bench('code')",                   "time code (1,000 iterations)")
       row.("bench('a', vs: 'b')",             "compare two snippets")
       row.("bench('code', memory: true)",     "GC / object allocation profile")
       row.("bench('code', iterations: 5000)", "custom iteration count")
 
-      section.("Cheatsheet")
-      row.("cheat",           "general Ruby reference")
-      row.("cheat('array')",  "topic: array hash string enumerable file regex date")
+      section.("Cheatsheet & Docs")
+      row.("cheat / cheat('array')", "Ruby reference (array hash string enumerable file regex date)")
+      row.("explain('method')",      "explain a Ruby method")
+      row.("example('topic')",       "code examples for a topic")
+      row.("practices('topic')",     "best practices for a topic")
+      row.("ref('keyword')",         "quick reference lookup")
 
-      section.("Docs")
-      row.("explain('method')",   "explain a Ruby method")
-      row.("example('topic')",    "code examples for a topic")
-      row.("practices('topic')",  "best practices for a topic")
-      row.("ref('keyword')",      "quick reference lookup")
-
-      puts "\n  tip: IRB built-ins — ".light_black +
-           "history  ls  show_source  show_doc  help  exit".white
+      puts
+      puts "  #{ui.rule(64)}"
+      built_ins = "history  ls  show_source  show_doc  help  exit"
+      built_ins += "  reload!  app  helper" if defined?(Rails)
+      puts "  #{ui.paint('IRB built-ins:', :light_black)} #{ui.paint(built_ins, :white)}"
       puts
       nil
     end
@@ -56,29 +61,30 @@ module PrettyIRB
     # ── snippets ──────────────────────────────────────────────────────────
 
     def snippet(action = :list, name = nil, code = nil, description: "")
+      ui  = PrettyIRB::UI
       mgr = PrettyIRB::Shell.snippet_manager
       case action.to_sym
       when :list
-        puts mgr.list
+        puts format_panel(mgr.list)
       when :save
-        puts mgr.save(name.to_s, code.to_s, description)
+        puts "  #{ui.paint(mgr.save(name.to_s, code.to_s, description), :green)}"
       when :load
         src = mgr.load(name.to_s)
         if src.is_a?(String) && !src.start_with?("❌")
-          puts "  loaded: #{name}".cyan
+          puts "  #{ui.paint("loaded:", :light_black)} #{ui.paint(name.to_s, :cyan, :bold)}"
           puts PrettyIRB::Formatter.highlight_code(src)
           eval(src, IRB.CurrentContext.workspace.binding)
         else
-          puts src
+          puts "  #{ui.paint(src, :light_red)}"
         end
       when :show
         puts PrettyIRB::Formatter.highlight_code(mgr.show(name.to_s))
       when :delete
-        puts mgr.delete(name.to_s)
+        puts "  #{ui.paint(mgr.delete(name.to_s), :yellow)}"
       when :search
-        puts mgr.search(name.to_s)
+        puts format_panel(mgr.search(name.to_s))
       else
-        puts "  actions: :list  :save  :load  :show  :delete  :search".yellow
+        puts "  #{ui.paint('actions: :list  :save  :load  :show  :delete  :search', :yellow)}"
       end
       nil
     end
@@ -87,12 +93,13 @@ module PrettyIRB
 
     def vars(name = nil, type: nil, search: nil, memory: false)
       inspector = PrettyIRB::VariableInspector.new(IRB.CurrentContext.workspace.binding)
-      if    memory then puts inspector.memory_usage
-      elsif type   then puts inspector.by_type(type.to_s)
-      elsif search then puts inspector.search(search.to_s)
-      elsif name   then puts inspector.inspect_var(name.to_s)
-      else              puts inspector.list_variables
-      end
+      output = if    memory then inspector.memory_usage
+               elsif type   then inspector.by_type(type.to_s)
+               elsif search then inspector.search(search.to_s)
+               elsif name   then inspector.inspect_var(name.to_s)
+               else              inspector.list_variables
+               end
+      puts format_panel(output)
       nil
     end
 
@@ -100,40 +107,74 @@ module PrettyIRB
 
     def bench(code, vs: nil, memory: false, iterations: 1000)
       b = IRB.CurrentContext.workspace.binding
-      if    memory then puts PrettyIRB::Benchmarker.profile_memory(code.to_s, iterations, b)
-      elsif vs     then puts PrettyIRB::Benchmarker.compare(code.to_s, vs.to_s, iterations, b)
-      else              puts PrettyIRB::Benchmarker.benchmark(code.to_s, iterations, b)
-      end
+      output = if    memory then PrettyIRB::Benchmarker.profile_memory(code.to_s, iterations, b)
+               elsif vs     then PrettyIRB::Benchmarker.compare(code.to_s, vs.to_s, iterations, b)
+               else              PrettyIRB::Benchmarker.benchmark(code.to_s, iterations, b)
+               end
+      puts format_panel(output)
       nil
     end
 
     # ── cheatsheet ────────────────────────────────────────────────────────
 
     def cheat(topic = nil)
-      puts PrettyIRB::CheatSheet.show(topic)
+      puts format_panel(PrettyIRB::CheatSheet.show(topic))
       nil
     end
 
     # ── docs ──────────────────────────────────────────────────────────────
 
     def explain(method_name)
-      puts PrettyIRB::AIHelper.explain_method(method_name.to_s)
+      puts format_panel(PrettyIRB::AIHelper.explain_method(method_name.to_s))
       nil
     end
 
     def example(topic)
-      puts PrettyIRB::AIHelper.get_example(topic.to_s)
+      puts format_panel(PrettyIRB::AIHelper.get_example(topic.to_s))
       nil
     end
 
     def practices(topic)
-      puts PrettyIRB::AIHelper.best_practices(topic.to_s)
+      puts format_panel(PrettyIRB::AIHelper.best_practices(topic.to_s))
       nil
     end
 
     def ref(keyword)
-      puts PrettyIRB::AIHelper.quick_reference(keyword.to_s)
+      puts format_panel(PrettyIRB::AIHelper.quick_reference(keyword.to_s))
       nil
+    end
+
+    private
+
+    def format_panel(text)
+      lines = text.to_s.lines.map(&:rstrip)
+      return "" if lines.empty?
+
+      ui = PrettyIRB::UI
+      header = ui.paint(lines.first, :cyan, :bold)
+      rest   = lines.drop(1).map { |line| format_panel_line(line, ui) }
+      (["\n  #{header}", "  #{ui.rule(56)}"] + rest + [""]).join("\n")
+    end
+
+    def format_panel_line(line, ui)
+      return "" if line.strip.empty?
+      return "  #{ui.paint(line, :light_red)}" if line.lstrip.start_with?("❌", "✗")
+      return "  #{ui.paint(line, :green)}"     if line.lstrip.start_with?("✓")
+
+      if (m = line.match(/\A(\s*)(= )(.+)\z/))
+        "  #{m[1]}#{ui.paint(m[2], :light_black)}#{ui.paint(m[3], :cyan)}"
+      elsif (m = line.match(/\A(\s*[•🔸📌]\s+)(.+)\z/))
+        "  #{ui.paint(m[1], :cyan)}#{m[2]}"
+      elsif (m = line.match(/\A([A-Za-z][A-Za-z0-9 &\/-]{1,34}:)\s*\z/))
+        "  #{ui.paint(m[1], :white, :bold)}"
+      elsif (m = line.match(/\A(\s*)([A-Z][A-Za-z0-9 _?\/-]{1,22}:)(\s+)(.+)\z/))
+        value_color = m[2] == "Winner:" ? :green : :white
+        "  #{m[1]}#{ui.paint(m[2], :light_black)}#{m[3]}#{ui.paint(m[4], value_color)}"
+      elsif (m = line.match(/\A(\s+.+?)(\s{2,}# .+)\z/))
+        "  #{m[1]}#{ui.paint(m[2], :light_black)}"
+      else
+        "  #{line}"
+      end
     end
   end
 end
