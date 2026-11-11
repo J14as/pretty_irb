@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] - 2026-11-11
+
+### Added
+- **Rails 7+ Console Integration (`PrettyIRB::Railtie`)** - Automatically wires `config.console` in `rails c` across Rails 7.0, 7.1, 7.2, and 8.x while preserving `reload!`, `app`, `helper`, `controller`, `Rails.backtrace_cleaner`, and `--sandbox`, plus `DISABLE_PRETTY_IRB=1` opt-out
+- **Configuration API (`PrettyIRB::Configuration`)** - Supports `PrettyIRB.configure` and Rails `config.pretty_irb` toggles (`colorize`, `syntax_highlight`, `auto_correct`, `banner`, `rails_env_prompt`)
+- **Terminal UI Toolkit (`PrettyIRB::UI`)** - ANSI-aware alignment, rounded banner/command cards, environment badges (`dev`, `test`, bold red `PROD`, `SANDBOX`), and column-aligned multiline prompt rails
+- **ActiveRecord & Struct Formatting** - Multi-line attribute formatting for `ActiveRecord::Base` and bounded `.limit(31)` formatting for `ActiveRecord::Relation`
+- **Exception Hints & Error History** - `ExceptionHook` on `IRB::Irb#handle_exception` records runtime errors in `HistoryManager` and provides non-duplicate typo / nil-receiver / syntax suggestions
+
 ## [0.1.0] - 2025-11-27
 
 ### Added
